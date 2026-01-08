@@ -4,6 +4,7 @@ socks5 proxy tunnel tool
 
 ## Installation
 ### Install dependencies
+- x86_64 architecture, 64bit, little endian
 - gcc (c99)
 - make
 
