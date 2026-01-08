@@ -74,13 +74,20 @@ example : ./tinyspider -4 192.168.0.10
 
 ```
 
+> [!CAUTION]
+> The usage is similar to [spider Linux](https://github.com/shuichiro-endo/spider/tree/main/Linux#example).
+>
+> However, [tinyspider](https://github.com/shuichiro-endo/tinyspider) is not compatible with [spider](https://github.com/shuichiro-endo/spider).
+>
+> [tinyspider](https://github.com/shuichiro-endo/tinyspider) and [spider](https://github.com/shuichiro-endo/spider) cannot be used together.
+
 ### run
 > [!IMPORTANT]
 > This program includes a simple DNS client implementation.
-> 
-> This program retrieves the IP address of the DNS server from /etc/resolv.conf (for example, nameserver 1.1.1.1) at startup.
 >
-> It performs domain name resolution to the IP address of the DNS server obtained.
+> It retrieves the IP address of the DNS server from /etc/resolv.conf (for example, nameserver 1.1.1.1) at startup.
+>
+> It performs domain name resolution of socks5 connection to the IP address of the DNS server obtained.
 ```
 > ./tinyspider -4 192.168.0.7
 
