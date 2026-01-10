@@ -33,7 +33,6 @@
 static void print_title();
 static void usage(char *filename);
 static int getopt(int argc, char **argv, const char *optstring);
-void dummy();
 int main(int argc, char **argv, char **envp) __attribute__((force_align_arg_pointer));
 void _start(void) __attribute__((naked));
 

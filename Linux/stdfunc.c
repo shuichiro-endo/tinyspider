@@ -181,11 +181,42 @@ int mprotect(void *addr, size_t len, int prot)
     return ret;
 }
 
+void signal_trampoline(void)
+{
+    __asm__ __volatile__
+    (
+        "mov $0xf, %rax\n"  // rt_sigreturn
+        "syscall"
+    );
+}
+
 int rt_sigaction(int signum, const struct sigaction *act, struct sigaction *oldact, size_t sigsetsize)
 {
     int ret = 0;
 
-    ret = syscall4(SYS_rt_sigaction, signum, (long)act, (long)oldact, sigsetsize);
+    kernel_sigaction kact;
+    kernel_sigaction koldact;
+
+    memset(&kact, 0, sizeof(kernel_sigaction));
+    memset(&koldact, 0, sizeof(kernel_sigaction));
+
+    if(act != NULL)
+    {
+        kact.k_sa_handler = act->sa_handler;
+        memcpy(&kact.sa_mask, &act->sa_mask, sizeof(sigset_t));
+        kact.sa_flags |= SA_RESTORER;
+        kact.sa_restorer = signal_trampoline;
+    }
+
+    ret = syscall4(SYS_rt_sigaction, signum, (long)&kact, (long)&koldact, sigsetsize);
+
+    if(oldact != NULL && ret >= 0)
+    {
+        oldact->sa_handler = koldact.k_sa_handler;
+        memcpy(&oldact->sa_mask, &koldact.sa_mask, sizeof(sigset_t));
+        oldact->sa_flags = koldact.sa_flags;
+        oldact->sa_restorer = koldact.sa_restorer;
+    }
 
     return ret;
 }

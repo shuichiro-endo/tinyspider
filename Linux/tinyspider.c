@@ -87,11 +87,6 @@ static int getopt(int argc, char **argv, const char *optstring)
     return 0;
 }
 
-void dummy()
-{
-    return;
-}
-
 int main(int argc, char **argv, char **envp)
 {
     int opt;
@@ -170,10 +165,7 @@ int main(int argc, char **argv, char **envp)
 
     sigaction_ign sa;
     memset(&sa, 0, sizeof(struct sigaction));
-
     sa.sa_handler = SIG_IGN;
-    sa.sa_flags = SA_RESTORER;
-    sa.sa_restorer = dummy;
 
     ret = rt_sigaction(SIGPIPE, (struct sigaction *)&sa, NULL, 8);
     if(ret < 0)

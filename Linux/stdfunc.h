@@ -211,6 +211,14 @@ typedef struct sigaction
     void (*sa_restorer)(void);
 } sigaction;
 
+typedef struct kernel_sigaction
+{
+    void (*k_sa_handler)(int);
+    unsigned long sa_flags;
+    void (*sa_restorer)(void);
+    sigset_t sa_mask;
+} kernel_sigaction;
+
 typedef struct fd_set
 {
     unsigned long fds_bits[FD_SETSIZE / (8 * sizeof(unsigned long))];
@@ -299,6 +307,7 @@ ssize_t write(int fd, void *buffer, size_t length);
 int open(const char *pathname, int flags);
 int close(int fd);
 int mprotect(void *addr, size_t len, int prot);
+void signal_trampoline(void) __attribute__((naked));
 int rt_sigaction(int signum, const struct sigaction *act, struct sigaction *oldact, size_t sigsetsize);
 int select(int nfds, struct fd_set *readfds, struct fd_set *writefds, struct fd_set *exceptfds, struct timeval *timeout);
 int dup2(int oldfd, int newfd);
