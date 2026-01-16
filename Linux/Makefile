@@ -1,6 +1,7 @@
 CC       = gcc
-CFLAGS   = -std=c99 -fno-stack-protector -fno-builtin
+CFLAGS   = -std=c99 -fno-stack-protector -fno-builtin -Os -static -nostdlib -nostartfiles -Wl,--entry="_start"
 LDFLAGS  =
+OPTS     =
 
 SRCS    += stdfunc.c
 SRCS    += spiderip.c
@@ -25,7 +26,7 @@ TARGET   = tinyspider
 INCDIR   =
 LIBDIR   =
 LIBS     =
-OPTS     = -static -nostdlib -nostartfiles
+
 
 
 all:       clean $(OBJS) $(TARGET)
@@ -34,10 +35,10 @@ debug:     CFLAGS += -D_DEBUG
 debug:     all
 
 $(TARGET): $(OBJS)
-	$(CC) $(OPTS) -o $@ $^ $(LIBDIR) $(LIBS) $(LDFLAGS)
+	$(CC) $(CFLAGS) $(OPTS) -o $@ $^ $(LIBDIR) $(LIBS) $(LDFLAGS)
 
 $(OBJS):   $(SRCS)
-	$(CC) $(OPTS) $(CFLAGS) $(INCDIR) -c $(SRCS)
+	$(CC) $(CFLAGS) $(INCDIR) -c $(SRCS)
 clean:
 	rm -f $(OBJS) $(TARGET)
 
