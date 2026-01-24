@@ -290,10 +290,10 @@ int main(int argc, char **argv, char **envp)
     if(routing_mode != NULL && (strcmp(routing_mode, "a") == 0)) // auto
     {
         start_thread(m_thread, (void *)update_routing_table, NULL);
-        sleep(0.1);
+        millisleep(100);
 
         start_thread(m_thread, (void *)delete_routing_table, NULL);
-        sleep(0.1);
+        millisleep(100);
     }
 
     start_thread(m_thread, (void *)message_worker, &prevent_spider_server_startup_flag);

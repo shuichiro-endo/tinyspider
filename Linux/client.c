@@ -812,10 +812,10 @@ void forwarder_client(struct client_data * client)
     struct stack_head *stack_forwarder_send_data_client = NULL;
 
     stack_forwarder_recv_data_client = start_thread(m_thread, (void *)forwarder_recv_data_client, (void *)client);
-    sleep(0.1);
+    millisleep(100);
 
     stack_forwarder_send_data_client = start_thread(m_thread, (void *)forwarder_send_data_client, (void *)client);
-    sleep(0.1);
+    millisleep(100);
 
     futex_wait(&stack_forwarder_recv_data_client->join_futex, 0);
     futex_wait(&stack_forwarder_send_data_client->join_futex, 0);
@@ -1230,7 +1230,7 @@ void listen_client(struct stack_head *stack)
 #endif
 
             start_thread(m_thread, (void *)client_worker, (void *)client);
-            sleep(0.1);
+            millisleep(100);
         }
     }else   // ipv6
     {
@@ -1360,7 +1360,7 @@ void listen_client(struct stack_head *stack)
 #endif
 
             start_thread(m_thread, (void *)client_worker, (void *)client);
-            sleep(0.1);
+            millisleep(100);
         }
     }
 

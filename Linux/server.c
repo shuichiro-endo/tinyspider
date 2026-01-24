@@ -814,10 +814,10 @@ void forwarder_server(struct server_data *server)
     struct stack_head *stack_forwarder_send_data_server = NULL;
 
     stack_forwarder_recv_data_server = start_thread(m_thread, (void *)forwarder_recv_data_server, (void *)server);
-    sleep(0.1);
+    millisleep(100);
 
     stack_forwarder_send_data_server = start_thread(m_thread, (void *)forwarder_send_data_server, (void *)server);
-    sleep(0.1);
+    millisleep(100);
 
     futex_wait(&stack_forwarder_recv_data_server->join_futex, 0);
     futex_wait(&stack_forwarder_send_data_server->join_futex, 0);

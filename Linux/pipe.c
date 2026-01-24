@@ -754,13 +754,13 @@ void pipe_worker(struct stack_head *stack_pipe_worker)
     uint32_t pipe_id = pipe->pipe_id;
 
     stack_pipe_recv_message = start_thread(m_thread, (void *)pipe_recv_message, (void *)pipe);
-    sleep(0.1);
+    millisleep(100);
 
     stack_pipe_send_routing_message = start_thread(m_thread, (void *)pipe_send_routing_message, (void *)pipe);
-    sleep(0.1);
+    millisleep(100);
 
     stack_pipe_send_socks5_message = start_thread(m_thread, (void *)pipe_send_socks5_message, (void *)pipe);
-    sleep(0.1);
+    millisleep(100);
 
     futex_wait(&stack_pipe_recv_message->join_futex, 0);
 
@@ -992,7 +992,7 @@ void connect_pipe(struct stack_head *stack)
     send_routing_table();
 
     start_thread(m_thread, (void *)pipe_worker, (void *)pipe);
-    sleep(0.1);
+    millisleep(100);
 
 exit_0:
     thread = search_map_node_thread(m_thread, stack->thread_id);
@@ -1148,7 +1148,7 @@ void listen_pipe(struct stack_head *stack)
             send_routing_table();
 
             start_thread(m_thread, (void *)pipe_worker, (void *)pipe);
-            sleep(0.1);
+            millisleep(100);
         }
     }else   // ipv6
     {
@@ -1273,7 +1273,7 @@ void listen_pipe(struct stack_head *stack)
             send_routing_table();
 
             start_thread(m_thread, (void *)pipe_worker, (void *)pipe);
-            sleep(0.1);
+            millisleep(100);
         }
     }
 
