@@ -1627,6 +1627,8 @@ void server_worker(struct stack_head *stack)
     struct spider_message *message = args->message;
     struct map_node_thread *thread = NULL;
 
+    free(args);
+
     do_socks5_connection_server(server, message);
 
     free_map_server_receive_message(server->m_server_receive_message, &server->sem_m_server_receive_message);
