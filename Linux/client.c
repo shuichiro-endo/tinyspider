@@ -1132,6 +1132,7 @@ void listen_client(struct stack_head *stack)
         {
             printf("[-] listen_client inet_pton error\n");
 
+            free(client_listen);
             goto exit_0;
         }
 
@@ -1149,6 +1150,7 @@ void listen_client(struct stack_head *stack)
         {
             printf("[-] listen_client bind error: %d\n", ret);
 
+            free(client_listen);
             goto exit_0;
         }
 
@@ -1241,6 +1243,7 @@ void listen_client(struct stack_head *stack)
         {
             printf("[-] listen_client inet_pton error\n");
 
+            free(client_listen);
             goto exit_0;
         }
 
@@ -1263,6 +1266,7 @@ void listen_client(struct stack_head *stack)
         {
             printf("[-] listen_client bind error: %d\n", ret);
 
+            free(client_listen);
             goto exit_0;
         }
 

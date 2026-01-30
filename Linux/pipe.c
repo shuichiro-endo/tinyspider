@@ -1056,6 +1056,7 @@ void listen_pipe(struct stack_head *stack)
         {
             printf("[-] listen_pipe inet_pton error\n");
 
+            free(pipe_listen);
             goto exit_0;
         }
 
@@ -1073,6 +1074,7 @@ void listen_pipe(struct stack_head *stack)
         {
             printf("[-] listen_pipe bind error: %d\n", ret);
 
+            free(pipe_listen);
             goto exit_0;
         }
 
@@ -1159,6 +1161,7 @@ void listen_pipe(struct stack_head *stack)
         {
             printf("[-] listen_pipe inet_pton error\n");
 
+            free(pipe_listen);
             goto exit_0;
         }
 
@@ -1181,6 +1184,7 @@ void listen_pipe(struct stack_head *stack)
         {
             printf("[-] listen_pipe bind error: %d\n", ret);
 
+            free(pipe_listen);
             goto exit_0;
         }
 
