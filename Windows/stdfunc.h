@@ -5,7 +5,10 @@
 
 /*
  * Reference:
- * https://www.vergiliusproject.com/kernels/x64/windows-11/25h2/_PEB64
+ * https://www.vergiliusproject.com/kernels/x64/windows-11/25h2
+ * https://ntdoc.m417z.com/
+ * https://j00ru.vexillium.org/syscalls/nt/64/
+ * https://learn.microsoft.com/en-us/
  */
 
 #pragma once

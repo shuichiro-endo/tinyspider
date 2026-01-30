@@ -7,6 +7,10 @@
  * Reference:
  * https://nullprogram.com/blog/2022/02/18/
  * https://github.com/skeeto/scratch/blob/master/parsers/cmdline.c
+ * https://www.vergiliusproject.com/kernels/x64/windows-11/25h2
+ * https://ntdoc.m417z.com/
+ * https://j00ru.vexillium.org/syscalls/nt/64/
+ * https://learn.microsoft.com
  */
 
 #include "stdfunc.h"
