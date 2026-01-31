@@ -127,14 +127,15 @@ NTSTATUS syscall2(long long n,
         "movq 0x70(%%rsp), %%rcx\n"
         "movq %%rcx, %%r10\n"
         "movq 0x68(%%rsp), %%rax\n"
+        "movq %[syscalladdress], %%r11\n"
         "lea 0x7(%%rip), %%rcx\n"
         "movq %%rcx, (%%rsp)\n"
-        "jmp *%[syscalladdress]\n"
+        "jmp *%%r11\n"
         "add $0x58, %%rsp\n"
         "ret"
         :
-        : [syscalladdress] "r" (syscalladdress)
-        : "rax", "rcx", "rdx", "r8", "r9", "r10", "cc", "memory"
+        : [syscalladdress] "m" (syscalladdress)
+        : "rax", "rcx", "rdx", "r8", "r9", "r10", "r11", "cc", "memory"
     );
 }
 
