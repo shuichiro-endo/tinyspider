@@ -7,7 +7,7 @@ socks5 proxy tunnel tool
 - x86_64 architecture, 64bit, little endian
   - build environment: Linux
   - execution environment: Windows11 (24H2)
-- x86_64-w64-mingw32-gcc (c99)
+- gcc-mingw-w64-x86-64 (c99)
 - make
 
 ### Install
