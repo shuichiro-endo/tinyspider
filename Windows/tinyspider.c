@@ -8,6 +8,7 @@
 extern HANDLE stdin;
 extern HANDLE stdout;
 extern HANDLE mallocaddress_mutex;
+extern void *syscalladdress;
 
 extern _WSAStartup WSAStartup;
 extern _WSACleanup WSACleanup;
@@ -110,6 +111,8 @@ int init(void)
     NTSTATUS status;
     _LoadLibraryA LoadLibraryA = NULL;
     HMODULE ws2_32_dll = NULL;
+
+    syscalladdress = search_syscall_address("NtTestAlert");
 
     stdin = GetStdHandle(STD_INPUT_HANDLE);
     if(stdin == INVALID_HANDLE_VALUE)

@@ -173,6 +173,7 @@ typedef BYTE *              PBYTE;
 typedef BYTE *              LPBYTE;
 typedef BYTE                BOOLEAN;
 typedef char                CHAR;
+typedef CHAR *              PCHAR;
 typedef unsigned char       UCHAR;
 typedef short               SHORT;
 typedef unsigned short      USHORT;
@@ -207,11 +208,14 @@ typedef SSIZE_T             ssize_t;
 
 
 typedef unsigned short      WORD;
+typedef WORD *              PWORD;
 typedef unsigned long long  WORD_PTR;
 typedef unsigned long       DWORD;
+typedef DWORD *             PDWORD;
 typedef ULONG_PTR           DWORD_PTR;
 typedef unsigned long long  DWORD64;
 typedef unsigned long long  QWORD;
+typedef QWORD *             PQWORD;
 typedef unsigned long long  QWORD_PTR;
 
 typedef CHAR *              LPSTR;
@@ -1051,6 +1055,8 @@ typedef int (*_closesocket)(SOCKET s);
 
 NTSTATUS syscall(long long n, long long a, long long b, long long c, long long d, long long e, long long f, long long g, long long h, long long i, long long j, long long k) __attribute((naked));
 
+NTSTATUS syscall2(long long n, long long a, long long b, long long c, long long d, long long e, long long f, long long g, long long h, long long i, long long j, long long k) __attribute((naked));
+
 #define NtCurrentProcess()  ((HANDLE)(LONG_PTR)-1)
 
 NTSTATUS NtCreateFile(PHANDLE FileHandle, ACCESS_MASK DesiredAccess, POBJECT_ATTRIBUTES ObjectAttributes, PIO_STATUS_BLOCK IoStatusBlock, PLARGE_INTEGER AllocationSize, ULONG FileAttributes, ULONG ShareAccess, ULONG CreateDisposition, ULONG CreateOptions, PVOID EaBuffer, ULONG EaLength);
@@ -1166,6 +1172,7 @@ ULONG GetSessionId();
 NTSTATUS BaseGetNamedObjectDirectory(HANDLE *dir);
 HMODULE GetModuleHandleW(wchar_t *lpModuleName);
 FARPROC GetProcAddress(HMODULE hModule, LPCSTR lpProcName);
+void *search_syscall_address(char *name);
 
 
 // spider function

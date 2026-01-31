@@ -20,6 +20,7 @@ HANDLE stdout = NULL;
 HANDLE rootdir = NULL;
 HANDLE mallocaddress_mutex = NULL;
 void *mallocaddress = (void *)0x25000000000;
+void *syscalladdress = NULL;
 
 _WSAStartup WSAStartup = NULL;
 _WSACleanup WSACleanup = NULL;
@@ -82,7 +83,58 @@ NTSTATUS syscall(long long n,
         "ret"
         :
         :
-        : "rax", "rdx", "r8", "r9", "r10", "cc", "memory"
+        : "rax", "rcx", "rdx", "r8", "r9", "r10", "cc", "memory"
+    );
+}
+
+NTSTATUS syscall2(long long n,
+                  long long a,
+                  long long b,
+                  long long c,
+                  long long d,
+                  long long e,
+                  long long f,
+                  long long g,
+                  long long h,
+                  long long i,
+                  long long j,
+                  long long k)
+{
+    __asm__ __volatile__
+    (
+        "movq %%rcx, 0x8(%%rsp)\n"
+        "movq %%rdx, 0x10(%%rsp)\n"
+        "movq %%r8, 0x18(%%rsp)\n"
+        "movq %%r9, 0x20(%%rsp)\n"
+        "sub $0x60, %%rsp\n"
+        "movq 0xc0(%%rsp), %%rcx\n"
+        "movq %%rcx, 0x58(%%rsp)\n"
+        "movq 0xb8(%%rsp), %%rcx\n"
+        "movq %%rcx, 0x50(%%rsp)\n"
+        "movq 0xb0(%%rsp), %%rcx\n"
+        "movq %%rcx, 0x48(%%rsp)\n"
+        "movq 0xa8(%%rsp), %%rcx\n"
+        "movq %%rcx, 0x40(%%rsp)\n"
+        "movq 0xa0(%%rsp), %%rcx\n"
+        "movq %%rcx, 0x38(%%rsp)\n"
+        "movq 0x98(%%rsp), %%rcx\n"
+        "movq %%rcx, 0x30(%%rsp)\n"
+        "movq 0x90(%%rsp), %%rcx\n"
+        "movq %%rcx, 0x28(%%rsp)\n"
+        "movq 0x88(%%rsp), %%r9\n"
+        "movq 0x80(%%rsp), %%r8\n"
+        "movq 0x78(%%rsp), %%rdx\n"
+        "movq 0x70(%%rsp), %%rcx\n"
+        "movq %%rcx, %%r10\n"
+        "movq 0x68(%%rsp), %%rax\n"
+        "lea 0x7(%%rip), %%rcx\n"
+        "movq %%rcx, (%%rsp)\n"
+        "jmp *%[syscalladdress]\n"
+        "add $0x58, %%rsp\n"
+        "ret"
+        :
+        : [syscalladdress] "r" (syscalladdress)
+        : "rax", "rcx", "rdx", "r8", "r9", "r10", "cc", "memory"
     );
 }
 
@@ -100,18 +152,35 @@ NTSTATUS NtCreateFile(PHANDLE FileHandle,
 {
     NTSTATUS status;
 
-    status = syscall((long long)SYS_NtCreateFile,
-                     (long long)FileHandle,
-                     (long long)DesiredAccess,
-                     (long long)ObjectAttributes,
-                     (long long)IoStatusBlock,
-                     (long long)AllocationSize,
-                     (long long)FileAttributes,
-                     (long long)ShareAccess,
-                     (long long)CreateDisposition,
-                     (long long)CreateOptions,
-                     (long long)EaBuffer,
-                     (long long)EaLength);
+    if(syscalladdress == NULL)
+    {
+        status = syscall((long long)SYS_NtCreateFile,
+                         (long long)FileHandle,
+                         (long long)DesiredAccess,
+                         (long long)ObjectAttributes,
+                         (long long)IoStatusBlock,
+                         (long long)AllocationSize,
+                         (long long)FileAttributes,
+                         (long long)ShareAccess,
+                         (long long)CreateDisposition,
+                         (long long)CreateOptions,
+                         (long long)EaBuffer,
+                         (long long)EaLength);
+    }else
+    {
+        status = syscall2((long long)SYS_NtCreateFile,
+                          (long long)FileHandle,
+                          (long long)DesiredAccess,
+                          (long long)ObjectAttributes,
+                          (long long)IoStatusBlock,
+                          (long long)AllocationSize,
+                          (long long)FileAttributes,
+                          (long long)ShareAccess,
+                          (long long)CreateDisposition,
+                          (long long)CreateOptions,
+                          (long long)EaBuffer,
+                          (long long)EaLength);
+    }
 
     return status;
 }
@@ -128,18 +197,35 @@ NTSTATUS NtReadFile(HANDLE FileHandle,
 {
     NTSTATUS status;
 
-    status = syscall((long long)SYS_NtReadFile,
-                     (long long)FileHandle,
-                     (long long)Event,
-                     (long long)ApcRoutine,
-                     (long long)ApcContext,
-                     (long long)IoStatusBlock,
-                     (long long)Buffer,
-                     (long long)Length,
-                     (long long)ByteOffset,
-                     (long long)Key,
-                     (long long)0,
-                     (long long)0);
+    if(syscalladdress == NULL)
+    {
+        status = syscall((long long)SYS_NtReadFile,
+                         (long long)FileHandle,
+                         (long long)Event,
+                         (long long)ApcRoutine,
+                         (long long)ApcContext,
+                         (long long)IoStatusBlock,
+                         (long long)Buffer,
+                         (long long)Length,
+                         (long long)ByteOffset,
+                         (long long)Key,
+                         (long long)0,
+                         (long long)0);
+    }else
+    {
+        status = syscall2((long long)SYS_NtReadFile,
+                          (long long)FileHandle,
+                          (long long)Event,
+                          (long long)ApcRoutine,
+                          (long long)ApcContext,
+                          (long long)IoStatusBlock,
+                          (long long)Buffer,
+                          (long long)Length,
+                          (long long)ByteOffset,
+                          (long long)Key,
+                          (long long)0,
+                          (long long)0);
+    }
 
     return status;
 }
@@ -156,18 +242,35 @@ NTSTATUS NtWriteFile(HANDLE FileHandle,
 {
     NTSTATUS status;
 
-    status = syscall((long long)SYS_NtWriteFile,
-                     (long long)FileHandle,
-                     (long long)Event,
-                     (long long)ApcRoutine,
-                     (long long)ApcContext,
-                     (long long)IoStatusBlock,
-                     (long long)Buffer,
-                     (long long)Length,
-                     (long long)ByteOffset,
-                     (long long)Key,
-                     (long long)0,
-                     (long long)0);
+    if(syscalladdress == NULL)
+    {
+        status = syscall((long long)SYS_NtWriteFile,
+                         (long long)FileHandle,
+                         (long long)Event,
+                         (long long)ApcRoutine,
+                         (long long)ApcContext,
+                         (long long)IoStatusBlock,
+                         (long long)Buffer,
+                         (long long)Length,
+                         (long long)ByteOffset,
+                         (long long)Key,
+                         (long long)0,
+                         (long long)0);
+    }else
+    {
+        status = syscall2((long long)SYS_NtWriteFile,
+                          (long long)FileHandle,
+                          (long long)Event,
+                          (long long)ApcRoutine,
+                          (long long)ApcContext,
+                          (long long)IoStatusBlock,
+                          (long long)Buffer,
+                          (long long)Length,
+                          (long long)ByteOffset,
+                          (long long)Key,
+                          (long long)0,
+                          (long long)0);
+    }
 
     return status;
 }
@@ -176,18 +279,35 @@ NTSTATUS NtClose(HANDLE Handle)
 {
     NTSTATUS status;
 
-    status = syscall((long long)SYS_NtClose,
-                     (long long)Handle,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0);
+    if(syscalladdress == NULL)
+    {
+        status = syscall((long long)SYS_NtClose,
+                         (long long)Handle,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0);
+    }else
+    {
+        status = syscall2((long long)SYS_NtClose,
+                          (long long)Handle,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0);
+    }
 
     return status;
 }
@@ -201,18 +321,35 @@ NTSTATUS NtAllocateVirtualMemory(HANDLE ProcessHandle,
 {
     NTSTATUS status;
 
-    status = syscall((long long)SYS_NtAllocateVirtualMemory,
-                     (long long)ProcessHandle,
-                     (long long)BaseAddress,
-                     (long long)ZeroBits,
-                     (long long)RegionSize,
-                     (long long)AllocationType,
-                     (long long)Protect,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0);
+    if(syscalladdress == NULL)
+    {
+        status = syscall((long long)SYS_NtAllocateVirtualMemory,
+                         (long long)ProcessHandle,
+                         (long long)BaseAddress,
+                         (long long)ZeroBits,
+                         (long long)RegionSize,
+                         (long long)AllocationType,
+                         (long long)Protect,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0);
+    }else
+    {
+        status = syscall2((long long)SYS_NtAllocateVirtualMemory,
+                          (long long)ProcessHandle,
+                          (long long)BaseAddress,
+                          (long long)ZeroBits,
+                          (long long)RegionSize,
+                          (long long)AllocationType,
+                          (long long)Protect,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0);
+    }
 
     return status;
 }
@@ -224,18 +361,35 @@ NTSTATUS NtFreeVirtualMemory(HANDLE ProcessHandle,
 {
     NTSTATUS status;
 
-    status = syscall((long long)SYS_NtFreeVirtualMemory,
-                     (long long)ProcessHandle,
-                     (long long)BaseAddress,
-                     (long long)RegionSize,
-                     (long long)FreeType,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0);
+    if(syscalladdress == NULL)
+    {
+        status = syscall((long long)SYS_NtFreeVirtualMemory,
+                         (long long)ProcessHandle,
+                         (long long)BaseAddress,
+                         (long long)RegionSize,
+                         (long long)FreeType,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0);
+    }else
+    {
+        status = syscall2((long long)SYS_NtFreeVirtualMemory,
+                          (long long)ProcessHandle,
+                          (long long)BaseAddress,
+                          (long long)RegionSize,
+                          (long long)FreeType,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0);
+    }
 
     return status;
 }
@@ -252,18 +406,35 @@ NTSTATUS NtCreateThread(PHANDLE ThreadHandle,
 {
     NTSTATUS status;
 
-    status = syscall((long long)SYS_NtCreateThread,
-                     (long long)ThreadHandle,
-                     (long long)DesiredAccess,
-                     (long long)ObjectAttributes,
-                     (long long)ProcessHandle,
-                     (long long)ClientId,
-                     (long long)ThreadContext,
-                     (long long)InitialTeb,
-                     (long long)CreateSuspended,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0);
+    if(syscalladdress == NULL)
+    {
+        status = syscall((long long)SYS_NtCreateThread,
+                         (long long)ThreadHandle,
+                         (long long)DesiredAccess,
+                         (long long)ObjectAttributes,
+                         (long long)ProcessHandle,
+                         (long long)ClientId,
+                         (long long)ThreadContext,
+                         (long long)InitialTeb,
+                         (long long)CreateSuspended,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0);
+    }else
+    {
+        status = syscall2((long long)SYS_NtCreateThread,
+                          (long long)ThreadHandle,
+                          (long long)DesiredAccess,
+                          (long long)ObjectAttributes,
+                          (long long)ProcessHandle,
+                          (long long)ClientId,
+                          (long long)ThreadContext,
+                          (long long)InitialTeb,
+                          (long long)CreateSuspended,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0);
+    }
 
     return status;
 }
@@ -282,18 +453,35 @@ NTSTATUS NtCreateThreadEx(PHANDLE ThreadHandle,
 {
     NTSTATUS status;
 
-    status = syscall((long long)SYS_NtCreateThreadEx,
-                     (long long)ThreadHandle,
-                     (long long)DesiredAccess,
-                     (long long)ObjectAttributes,
-                     (long long)ProcessHandle,
-                     (long long)StartRoutine,
-                     (long long)Argument,
-                     (long long)CreateFlags,
-                     (long long)ZeroBits,
-                     (long long)StackSize,
-                     (long long)MaximumStackSize,
-                     (long long)AttributeList);
+    if(syscalladdress == NULL)
+    {
+        status = syscall((long long)SYS_NtCreateThreadEx,
+                         (long long)ThreadHandle,
+                         (long long)DesiredAccess,
+                         (long long)ObjectAttributes,
+                         (long long)ProcessHandle,
+                         (long long)StartRoutine,
+                         (long long)Argument,
+                         (long long)CreateFlags,
+                         (long long)ZeroBits,
+                         (long long)StackSize,
+                         (long long)MaximumStackSize,
+                         (long long)AttributeList);
+    }else
+    {
+        status = syscall2((long long)SYS_NtCreateThreadEx,
+                          (long long)ThreadHandle,
+                          (long long)DesiredAccess,
+                          (long long)ObjectAttributes,
+                          (long long)ProcessHandle,
+                          (long long)StartRoutine,
+                          (long long)Argument,
+                          (long long)CreateFlags,
+                          (long long)ZeroBits,
+                          (long long)StackSize,
+                          (long long)MaximumStackSize,
+                          (long long)AttributeList);
+    }
 
     return status;
 }
@@ -303,18 +491,35 @@ NTSTATUS NtTerminateProcess(HANDLE ProcessHandle,
 {
     NTSTATUS status;
 
-    status = syscall((long long)SYS_NtTerminateThread,
-                     (long long)ProcessHandle,
-                     (long long)ExitStatus,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0);
+    if(syscalladdress == NULL)
+    {
+        status = syscall((long long)SYS_NtTerminateThread,
+                         (long long)ProcessHandle,
+                         (long long)ExitStatus,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0);
+    }else
+    {
+        status = syscall2((long long)SYS_NtTerminateThread,
+                          (long long)ProcessHandle,
+                          (long long)ExitStatus,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0);
+    }
 
     return status;
 }
@@ -324,18 +529,35 @@ NTSTATUS NtTerminateThread(HANDLE ThreadHandle,
 {
     NTSTATUS status;
 
-    status = syscall((long long)SYS_NtTerminateThread,
-                     (long long)ThreadHandle,
-                     (long long)ExitStatus,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0);
+    if(syscalladdress == NULL)
+    {
+        status = syscall((long long)SYS_NtTerminateThread,
+                         (long long)ThreadHandle,
+                         (long long)ExitStatus,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0);
+    }else
+    {
+        status = syscall2((long long)SYS_NtTerminateThread,
+                          (long long)ThreadHandle,
+                          (long long)ExitStatus,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0);
+    }
 
     return status;
 }
@@ -348,18 +570,35 @@ NTSTATUS NtOpenDirectoryObject(PHANDLE DirectoryHandle,
 {
     NTSTATUS status;
 
-    status = syscall((long long)SYS_NtOpenDirectoryObject,
-                     (long long)DirectoryHandle,
-                     (long long)DesiredAccess,
-                     (long long)ObjectAttributes,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0);
+    if(syscalladdress == NULL)
+    {
+        status = syscall((long long)SYS_NtOpenDirectoryObject,
+                         (long long)DirectoryHandle,
+                         (long long)DesiredAccess,
+                         (long long)ObjectAttributes,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0);
+    }else
+    {
+        status = syscall2((long long)SYS_NtOpenDirectoryObject,
+                          (long long)DirectoryHandle,
+                          (long long)DesiredAccess,
+                          (long long)ObjectAttributes,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0);
+    }
 
     return status;
 }
@@ -372,18 +611,35 @@ NTSTATUS NtCreateSemaphore(PHANDLE SemaphoreHandle,
 {
     NTSTATUS status;
 
-    status = syscall((long long)SYS_NtCreateSemaphore,
-                     (long long)SemaphoreHandle,
-                     (long long)DesiredAccess,
-                     (long long)ObjectAttributes,
-                     (long long)InitialCount,
-                     (long long)MaximumCount,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0);
+    if(syscalladdress == NULL)
+    {
+        status = syscall((long long)SYS_NtCreateSemaphore,
+                         (long long)SemaphoreHandle,
+                         (long long)DesiredAccess,
+                         (long long)ObjectAttributes,
+                         (long long)InitialCount,
+                         (long long)MaximumCount,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0);
+    }else
+    {
+        status = syscall2((long long)SYS_NtCreateSemaphore,
+                          (long long)SemaphoreHandle,
+                          (long long)DesiredAccess,
+                          (long long)ObjectAttributes,
+                          (long long)InitialCount,
+                          (long long)MaximumCount,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0);
+    }
 
     return status;
 
@@ -395,18 +651,35 @@ NTSTATUS NtOpenSemaphore(PHANDLE SemaphoreHandle,
 {
     NTSTATUS status;
 
-    status = syscall((long long)SYS_NtOpenSemaphore,
-                     (long long)SemaphoreHandle,
-                     (long long)DesiredAccess,
-                     (long long)ObjectAttributes,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0);
+    if(syscalladdress == NULL)
+    {
+        status = syscall((long long)SYS_NtOpenSemaphore,
+                         (long long)SemaphoreHandle,
+                         (long long)DesiredAccess,
+                         (long long)ObjectAttributes,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0);
+    }else
+    {
+        status = syscall2((long long)SYS_NtOpenSemaphore,
+                          (long long)SemaphoreHandle,
+                          (long long)DesiredAccess,
+                          (long long)ObjectAttributes,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0);
+    }
 
     return status;
 }
@@ -419,18 +692,35 @@ NTSTATUS NtQuerySemaphore(HANDLE SemaphoreHandle,
 {
     NTSTATUS status;
 
-    status = syscall((long long)SYS_NtQuerySemaphore,
-                     (long long)SemaphoreHandle,
-                     (long long)SemaphoreInformationClass,
-                     (long long)SemaphoreInformation,
-                     (long long)SemaphoreInformationLength,
-                     (long long)ReturnLength,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0);
+    if(syscalladdress == NULL)
+    {
+        status = syscall((long long)SYS_NtQuerySemaphore,
+                         (long long)SemaphoreHandle,
+                         (long long)SemaphoreInformationClass,
+                         (long long)SemaphoreInformation,
+                         (long long)SemaphoreInformationLength,
+                         (long long)ReturnLength,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0);
+    }else
+    {
+        status = syscall2((long long)SYS_NtQuerySemaphore,
+                          (long long)SemaphoreHandle,
+                          (long long)SemaphoreInformationClass,
+                          (long long)SemaphoreInformation,
+                          (long long)SemaphoreInformationLength,
+                          (long long)ReturnLength,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0);
+    }
 
     return status;
 }
@@ -441,18 +731,35 @@ NTSTATUS NtReleaseSemaphore(HANDLE SemaphoreHandle,
 {
     NTSTATUS status;
 
-    status = syscall((long long)SYS_NtReleaseSemaphore,
-                     (long long)SemaphoreHandle,
-                     (long long)ReleaseCount,
-                     (long long)PreviousCount,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0);
+    if(syscalladdress == NULL)
+    {
+        status = syscall((long long)SYS_NtReleaseSemaphore,
+                         (long long)SemaphoreHandle,
+                         (long long)ReleaseCount,
+                         (long long)PreviousCount,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0);
+    }else
+    {
+        status = syscall2((long long)SYS_NtReleaseSemaphore,
+                          (long long)SemaphoreHandle,
+                          (long long)ReleaseCount,
+                          (long long)PreviousCount,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0);
+    }
 
     return status;
 }
@@ -463,18 +770,35 @@ NTSTATUS NtWaitForSingleObject(HANDLE Handle,
 {
     NTSTATUS status;
 
-    status = syscall((long long)SYS_NtWaitForSingleObject,
-                     (long long)Handle,
-                     (long long)Alertable,
-                     (long long)Timeout,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0);
+    if(syscalladdress == NULL)
+    {
+        status = syscall((long long)SYS_NtWaitForSingleObject,
+                         (long long)Handle,
+                         (long long)Alertable,
+                         (long long)Timeout,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0);
+    }else
+    {
+        status = syscall2((long long)SYS_NtWaitForSingleObject,
+                          (long long)Handle,
+                          (long long)Alertable,
+                          (long long)Timeout,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0);
+    }
 
     return status;
 }
@@ -486,18 +810,35 @@ NTSTATUS NtCreateMutant(PHANDLE MutantHandle,
 {
     NTSTATUS status;
 
-    status = syscall((long long)SYS_NtCreateMutant,
-                     (long long)MutantHandle,
-                     (long long)DesiredAccess,
-                     (long long)ObjectAttributes,
-                     (long long)InitialOwner,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0);
+    if(syscalladdress == NULL)
+    {
+        status = syscall((long long)SYS_NtCreateMutant,
+                         (long long)MutantHandle,
+                         (long long)DesiredAccess,
+                         (long long)ObjectAttributes,
+                         (long long)InitialOwner,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0);
+    }else
+    {
+        status = syscall2((long long)SYS_NtCreateMutant,
+                          (long long)MutantHandle,
+                          (long long)DesiredAccess,
+                          (long long)ObjectAttributes,
+                          (long long)InitialOwner,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0);
+    }
 
     return status;
 }
@@ -508,18 +849,35 @@ NTSTATUS NtOpenMutant(PHANDLE MutantHandle,
 {
     NTSTATUS status;
 
-    status = syscall((long long)SYS_NtOpenMutant,
-                     (long long)MutantHandle,
-                     (long long)DesiredAccess,
-                     (long long)ObjectAttributes,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0);
+    if(syscalladdress == NULL)
+    {
+        status = syscall((long long)SYS_NtOpenMutant,
+                         (long long)MutantHandle,
+                         (long long)DesiredAccess,
+                         (long long)ObjectAttributes,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0);
+    }else
+    {
+        status = syscall2((long long)SYS_NtOpenMutant,
+                          (long long)MutantHandle,
+                          (long long)DesiredAccess,
+                          (long long)ObjectAttributes,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0);
+    }
 
     return status;
 }
@@ -532,18 +890,35 @@ NTSTATUS NtQueryMutant(HANDLE MutantHandle,
 {
     NTSTATUS status;
 
-    status = syscall((long long)SYS_NtQueryMutant,
-                     (long long)MutantHandle,
-                     (long long)MutantInformationClass,
-                     (long long)MutantInformation,
-                     (long long)MutantInformationLength,
-                     (long long)ReturnLength,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0);
+    if(syscalladdress == NULL)
+    {
+        status = syscall((long long)SYS_NtQueryMutant,
+                         (long long)MutantHandle,
+                         (long long)MutantInformationClass,
+                         (long long)MutantInformation,
+                         (long long)MutantInformationLength,
+                         (long long)ReturnLength,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0);
+    }else
+    {
+        status = syscall2((long long)SYS_NtQueryMutant,
+                          (long long)MutantHandle,
+                          (long long)MutantInformationClass,
+                          (long long)MutantInformation,
+                          (long long)MutantInformationLength,
+                          (long long)ReturnLength,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0);
+    }
 
     return status;
 }
@@ -553,18 +928,35 @@ NTSTATUS NtReleaseMutant(HANDLE MutantHandle,
 {
     NTSTATUS status;
 
-    status = syscall((long long)SYS_NtReleaseMutant,
-                     (long long)MutantHandle,
-                     (long long)PreviousCount,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0);
+    if(syscalladdress == NULL)
+    {
+        status = syscall((long long)SYS_NtReleaseMutant,
+                         (long long)MutantHandle,
+                         (long long)PreviousCount,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0);
+    }else
+    {
+        status = syscall2((long long)SYS_NtReleaseMutant,
+                          (long long)MutantHandle,
+                          (long long)PreviousCount,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0);
+    }
 
     return status;
 }
@@ -574,18 +966,35 @@ NTSTATUS NtDelayExecution(BOOLEAN Alertable,
 {
     NTSTATUS status;
 
-    status = syscall((long long)SYS_NtDelayExecution,
-                     (long long)Alertable,
-                     (long long)DelayInterval,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0);
+    if(syscalladdress == NULL)
+    {
+        status = syscall((long long)SYS_NtDelayExecution,
+                         (long long)Alertable,
+                         (long long)DelayInterval,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0);
+    }else
+    {
+        status = syscall2((long long)SYS_NtDelayExecution,
+                          (long long)Alertable,
+                          (long long)DelayInterval,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0);
+    }
 
     return status;
 }
@@ -600,18 +1009,35 @@ NTSTATUS NtCreateKey(PHANDLE KeyHandle,
 {
     NTSTATUS status;
 
-    status = syscall((long long)SYS_NtCreateKey,
-                     (long long)KeyHandle,
-                     (long long)DesiredAccess,
-                     (long long)ObjectAttributes,
-                     (long long)TitleIndex,
-                     (long long)Class,
-                     (long long)CreateOptions,
-                     (long long)Disposition,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0);
+    if(syscalladdress == NULL)
+    {
+        status = syscall((long long)SYS_NtCreateKey,
+                         (long long)KeyHandle,
+                         (long long)DesiredAccess,
+                         (long long)ObjectAttributes,
+                         (long long)TitleIndex,
+                         (long long)Class,
+                         (long long)CreateOptions,
+                         (long long)Disposition,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0);
+    }else
+    {
+        status = syscall2((long long)SYS_NtCreateKey,
+                          (long long)KeyHandle,
+                          (long long)DesiredAccess,
+                          (long long)ObjectAttributes,
+                          (long long)TitleIndex,
+                          (long long)Class,
+                          (long long)CreateOptions,
+                          (long long)Disposition,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0);
+    }
 
     return status;
 }
@@ -622,18 +1048,35 @@ NTSTATUS NtOpenKey(PHANDLE KeyHandle,
 {
     NTSTATUS status;
 
-    status = syscall((long long)SYS_NtOpenKey,
-                     (long long)KeyHandle,
-                     (long long)DesiredAccess,
-                     (long long)ObjectAttributes,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0);
+    if(syscalladdress == NULL)
+    {
+        status = syscall((long long)SYS_NtOpenKey,
+                         (long long)KeyHandle,
+                         (long long)DesiredAccess,
+                         (long long)ObjectAttributes,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0);
+    }else
+    {
+        status = syscall2((long long)SYS_NtOpenKey,
+                          (long long)KeyHandle,
+                          (long long)DesiredAccess,
+                          (long long)ObjectAttributes,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0);
+    }
 
     return status;
 }
@@ -645,18 +1088,35 @@ NTSTATUS NtOpenKeyEx(PHANDLE KeyHandle,
 {
     NTSTATUS status;
 
-    status = syscall((long long)SYS_NtOpenKeyEx,
-                     (long long)KeyHandle,
-                     (long long)DesiredAccess,
-                     (long long)ObjectAttributes,
-                     (long long)OpenOptions,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0);
+    if(syscalladdress == NULL)
+    {
+        status = syscall((long long)SYS_NtOpenKeyEx,
+                         (long long)KeyHandle,
+                         (long long)DesiredAccess,
+                         (long long)ObjectAttributes,
+                         (long long)OpenOptions,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0);
+    }else
+    {
+        status = syscall2((long long)SYS_NtOpenKeyEx,
+                          (long long)KeyHandle,
+                          (long long)DesiredAccess,
+                          (long long)ObjectAttributes,
+                          (long long)OpenOptions,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0);
+    }
 
     return status;
 }
@@ -669,18 +1129,35 @@ NTSTATUS NtQueryKey(HANDLE KeyHandle,
 {
     NTSTATUS status;
 
-    status = syscall((long long)SYS_NtQueryKey,
-                     (long long)KeyHandle,
-                     (long long)KeyInformationClass,
-                     (long long)KeyInformation,
-                     (long long)Length,
-                     (long long)ResultLength,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0);
+    if(syscalladdress == NULL)
+    {
+        status = syscall((long long)SYS_NtQueryKey,
+                         (long long)KeyHandle,
+                         (long long)KeyInformationClass,
+                         (long long)KeyInformation,
+                         (long long)Length,
+                         (long long)ResultLength,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0);
+    }else
+    {
+        status = syscall2((long long)SYS_NtQueryKey,
+                          (long long)KeyHandle,
+                          (long long)KeyInformationClass,
+                          (long long)KeyInformation,
+                          (long long)Length,
+                          (long long)ResultLength,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0);
+    }
 
     return status;
 }
@@ -694,18 +1171,35 @@ NTSTATUS NtEnumerateKey(HANDLE KeyHandle,
 {
     NTSTATUS status;
 
-    status = syscall((long long)SYS_NtEnumerateKey,
-                     (long long)KeyHandle,
-                     (long long)Index,
-                     (long long)KeyInformationClass,
-                     (long long)KeyInformation,
-                     (long long)Length,
-                     (long long)ResultLength,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0);
+    if(syscalladdress == NULL)
+    {
+        status = syscall((long long)SYS_NtEnumerateKey,
+                         (long long)KeyHandle,
+                         (long long)Index,
+                         (long long)KeyInformationClass,
+                         (long long)KeyInformation,
+                         (long long)Length,
+                         (long long)ResultLength,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0);
+    }else
+    {
+        status = syscall2((long long)SYS_NtEnumerateKey,
+                          (long long)KeyHandle,
+                          (long long)Index,
+                          (long long)KeyInformationClass,
+                          (long long)KeyInformation,
+                          (long long)Length,
+                          (long long)ResultLength,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0);
+    }
 
     return status;
 }
@@ -719,18 +1213,35 @@ NTSTATUS NtEnumerateValueKey(HANDLE KeyHandle,
 {
     NTSTATUS status;
 
-    status = syscall((long long)SYS_NtEnumerateValueKey,
-                     (long long)KeyHandle,
-                     (long long)Index,
-                     (long long)KeyValueInformationClass,
-                     (long long)KeyValueInformation,
-                     (long long)Length,
-                     (long long)ResultLength,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0);
+    if(syscalladdress == NULL)
+    {
+        status = syscall((long long)SYS_NtEnumerateValueKey,
+                         (long long)KeyHandle,
+                         (long long)Index,
+                         (long long)KeyValueInformationClass,
+                         (long long)KeyValueInformation,
+                         (long long)Length,
+                         (long long)ResultLength,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0);
+    }else
+    {
+        status = syscall2((long long)SYS_NtEnumerateValueKey,
+                          (long long)KeyHandle,
+                          (long long)Index,
+                          (long long)KeyValueInformationClass,
+                          (long long)KeyValueInformation,
+                          (long long)Length,
+                          (long long)ResultLength,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0);
+    }
 
     return status;
 }
@@ -740,18 +1251,35 @@ NTSTATUS NtQueryPerformanceCounter(PLARGE_INTEGER PerformanceCounter,
 {
     NTSTATUS status;
 
-    status = syscall((long long)SYS_NtQueryPerformanceCounter,
-                     (long long)PerformanceCounter,
-                     (long long)PerformanceFrequency,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0);
+    if(syscalladdress == NULL)
+    {
+        status = syscall((long long)SYS_NtQueryPerformanceCounter,
+                         (long long)PerformanceCounter,
+                         (long long)PerformanceFrequency,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0);
+    }else
+    {
+        status = syscall2((long long)SYS_NtQueryPerformanceCounter,
+                          (long long)PerformanceCounter,
+                          (long long)PerformanceFrequency,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0);
+    }
 
     return status;
 }
@@ -760,18 +1288,35 @@ NTSTATUS NtQuerySystemTime(PLARGE_INTEGER SystemTime)
 {
     NTSTATUS status;
 
-    status = syscall((long long)SYS_NtQuerySystemTime,
-                     (long long)SystemTime,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0,
-                     (long long)0);
+    if(syscalladdress == NULL)
+    {
+        status = syscall((long long)SYS_NtQuerySystemTime,
+                         (long long)SystemTime,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0,
+                         (long long)0);
+    }else
+    {
+        status = syscall2((long long)SYS_NtQuerySystemTime,
+                          (long long)SystemTime,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0,
+                          (long long)0);
+    }
 
     return status;
 }
@@ -780,18 +1325,35 @@ ULONG NtGetCurrentProcessorNumber(void)
 {
     ULONG pid;
 
-    pid = syscall((long long)SYS_NtGetCurrentProcessorNumber,
-                  (long long)0,
-                  (long long)0,
-                  (long long)0,
-                  (long long)0,
-                  (long long)0,
-                  (long long)0,
-                  (long long)0,
-                  (long long)0,
-                  (long long)0,
-                  (long long)0,
-                  (long long)0);
+    if(syscalladdress == NULL)
+    {
+        pid = syscall((long long)SYS_NtGetCurrentProcessorNumber,
+                      (long long)0,
+                      (long long)0,
+                      (long long)0,
+                      (long long)0,
+                      (long long)0,
+                      (long long)0,
+                      (long long)0,
+                      (long long)0,
+                      (long long)0,
+                      (long long)0,
+                      (long long)0);
+    }else
+    {
+        pid = syscall2((long long)SYS_NtGetCurrentProcessorNumber,
+                       (long long)0,
+                       (long long)0,
+                       (long long)0,
+                       (long long)0,
+                       (long long)0,
+                       (long long)0,
+                       (long long)0,
+                       (long long)0,
+                       (long long)0,
+                       (long long)0,
+                       (long long)0);
+    }
 
     return pid;
 }
@@ -2788,6 +3350,79 @@ FARPROC GetProcAddress(HMODULE hModule, LPCSTR lpProcName)
 
                     return FunctionAddress;
                 }
+            }
+        }
+    }
+
+    return NULL;
+}
+
+void *search_syscall_address(char *name)
+{
+    HMODULE BaseAddress = NULL;
+    PIMAGE_DOS_HEADER DosHeader = NULL;
+    PIMAGE_NT_HEADERS64 NtHeaders = NULL;
+    PIMAGE_FILE_HEADER FileHeader = NULL;
+    PIMAGE_OPTIONAL_HEADER64 OptionalHeader = NULL;
+    PIMAGE_EXPORT_DIRECTORY ExportDirectory = NULL;
+    PIMAGE_SECTION_HEADER SectionHeader = NULL;
+    WORD numberOfSections = 0;
+
+    DWORD ordinalBase = 0;
+    DWORD numberOfFunctions = 0;
+    DWORD numberOfNames = 0;
+    DWORD d = 0;
+    PDWORD AddressOfFunctions = NULL;
+    PDWORD AddressOfNames = NULL;
+    PWORD AddressOfNameOrdinals = NULL;
+    DWORD i = 0;
+    PCHAR FunctionName = NULL;
+    PBYTE FunctionAddress = NULL;
+    WORD ordinal = 0;
+
+    BaseAddress = GetModuleHandleW(L"NTDLL.DLL");
+    if(BaseAddress == NULL)
+    {
+        return NULL;
+    }
+
+    DosHeader = (PIMAGE_DOS_HEADER)BaseAddress;
+    NtHeaders = (PIMAGE_NT_HEADERS64)((LPBYTE)BaseAddress + DosHeader->e_lfanew);
+    FileHeader = (PIMAGE_FILE_HEADER)&NtHeaders->FileHeader;
+    OptionalHeader = (PIMAGE_OPTIONAL_HEADER64)&NtHeaders->OptionalHeader;
+    ExportDirectory = (PIMAGE_EXPORT_DIRECTORY)((PBYTE)DosHeader + OptionalHeader->DataDirectory[0].VirtualAddress);
+
+    ordinalBase = (DWORD)ExportDirectory->Base;
+    numberOfFunctions = (DWORD)ExportDirectory->NumberOfFunctions;
+    numberOfNames = (DWORD)ExportDirectory->NumberOfNames;
+
+    d = numberOfFunctions - numberOfNames;
+    if(d < 0)
+    {
+        d = 0;
+    }
+
+    AddressOfFunctions = (PDWORD)((PBYTE)BaseAddress + ExportDirectory->AddressOfFunctions);
+    AddressOfNames = (PDWORD)((PBYTE)BaseAddress + ExportDirectory->AddressOfNames);
+    AddressOfNameOrdinals = (PWORD)((PBYTE)BaseAddress + ExportDirectory->AddressOfNameOrdinals);
+
+    for(i = 0; i < numberOfNames; i++)
+    {
+        FunctionName = (PCHAR)((PBYTE)BaseAddress + AddressOfNames[i]);
+        FunctionAddress = (PBYTE)((PBYTE)BaseAddress + AddressOfFunctions[i + d]);
+        ordinal = (WORD)ordinalBase + AddressOfNameOrdinals[i];
+
+        if(strcmp(name, (char *)FunctionName) == 0)
+        {
+            if(*((PBYTE)FunctionAddress + 0x12) == 0x0f && *((PBYTE)FunctionAddress + 0x13) == 0x05 && *((PBYTE)FunctionAddress + 0x14) == 0xc3) // 0x0f05:syscall 0xc3:ret
+            {
+#ifdef _DEBUG
+//                printf("[+] search_syscall_address syscall: %x\n", (PBYTE)FunctionAddress + 0x12);
+#endif
+                return (void *)FunctionAddress + 0x12;
+            }else
+            {
+                return NULL;
             }
         }
     }
