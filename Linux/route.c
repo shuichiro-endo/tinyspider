@@ -519,13 +519,12 @@ int update_route(char *ip_address, struct route_data *r_data_new)
                  (r_data_new->alive == 0) &&
                  (r_node->data->alive == 1))
         {
-
             r_node->data->alive = r_data_new->alive;
             r_node->data->time = r_data_new->time;
 
             free(r_data_new);
             ret = 1;
-        }else if((r_node->data->pipe_id == 0) &&
+        }else if((r_node->data->alive == 0) &&
                  (r_data_new->alive == 1))
         {
             r_node->data->mode = r_data_new->mode;
@@ -702,8 +701,6 @@ error:
 static void delete_routing_table_inorder_avlt_node_route(struct avlt_node_route *root, char *ip_address)
 {
     int ret = 0;
-    struct timeval now;
-    long d = 0;
 
     if(root != NULL)
     {
@@ -711,21 +708,7 @@ static void delete_routing_table_inorder_avlt_node_route(struct avlt_node_route 
 
         if(root->data->alive == 0 && strlen(ip_address) == 0)  // dead
         {
-            ret = gettimeofday(&now, NULL);
-            if(ret == 1)
-            {
-#ifdef _DEBUG
-                printf("[-] delete_routing_table_inorder_avlt_node_route gettimeofday error\n");
-#endif
-                return;
-            }
-
-            d = now.tv_sec - root->data->time.tv_sec;
-
-            if(d >= DELETE_ROUTE_TIME)
-            {
-                strcpy(ip_address, root->ip);
-            }
+            strcpy(ip_address, root->ip);
         }
 
         delete_routing_table_inorder_avlt_node_route(root->right, ip_address);
