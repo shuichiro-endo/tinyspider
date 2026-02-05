@@ -27,7 +27,7 @@ static void print_title()
     printf(" : : : :: ,. :: :; :`._-.': .; `: :' .; :' '_.': ..'\n");
     printf(" :_; :_;:_;:_;`._. ;`.__.': ._.':_;`.__.'`.__.':_;  \n");
     printf("               .-. :      : :                     🕷️\n");
-    printf("               `._.'      :_;        Linux Ver: 0.01\n");
+    printf("               `._.'      :_; Linux x86-64 Ver: 0.01\n");
     printf("                              Author: Shuichiro Endo\n");
     printf("\n");
 }

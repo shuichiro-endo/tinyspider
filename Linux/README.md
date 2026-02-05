@@ -1,10 +1,10 @@
-# tinyspider (Linux)
+# tinyspider (Linux x86-64)
 
 socks5 proxy tunnel tool
 
 ## Installation
 ### Install dependencies
-- x86_64 architecture, 64bit, little endian
+- x86-64 architecture, 64bit, little endian
 - gcc (c99)
 - make
 
@@ -16,7 +16,7 @@ git clone https://github.com/shuichiro-endo/tinyspider.git
 
 2. build
 ```
-cd tinyspider/Linux
+cd tinyspider/Linux_x86-64
 make
 ls -lh tinyspider
 ```
@@ -24,7 +24,7 @@ ls -lh tinyspider
 > [!NOTE]
 > If you want to display debug messages, please build it using the following command.
 ```
-cd tinyspider/Linux
+cd tinyspider/Linux_x86-64
 make debug
 ls -lh tinyspider
 ```
@@ -54,7 +54,7 @@ nm tinyspider
  : : : :: ,. :: :; :`._-.': .; `: :' .; :' '_.': ..'
  :_; :_;:_;:_;`._. ;`.__.': ._.':_;`.__.'`.__.':_;  
                .-. :      : :                     🕷️
-               `._.'      :_;        Linux Ver: 0.01
+               `._.'      :_; Linux x86-64 Ver: 0.01
                               Author: Shuichiro Endo
 
 
@@ -97,7 +97,7 @@ example : ./tinyspider -4 192.168.0.10
  : : : :: ,. :: :; :`._-.': .; `: :' .; :' '_.': ..'
  :_; :_;:_;:_;`._. ;`.__.': ._.':_;`.__.'`.__.':_;  
                .-. :      : :                     🕷️
-               `._.'      :_;        Linux Ver: 0.01
+               `._.'      :_; Linux x86-64 Ver: 0.01
                               Author: Shuichiro Endo
 
 
