@@ -187,6 +187,8 @@ void push_socks5_message_server(struct stack_head *stack)
         free(message);
     }
 
+    millisleep(100);
+
     thread = search_map_node_thread(m_thread, stack->thread_id);
     if(thread != NULL)
     {
